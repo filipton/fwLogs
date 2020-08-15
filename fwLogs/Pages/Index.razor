@@ -1,0 +1,56 @@
+﻿@page "/"
+@inject NavigationManager NavManager
+@implements IDisposable
+
+@foreach (string key in fwLogs.Data.LogsService.AllLogs.Keys)
+{
+    <p>@key</p>
+
+    foreach (var val in fwLogs.Data.LogsService.AllLogs[key])
+    {
+        <a>@val</a>
+    }
+}
+
+@code {
+    public static List<Index> indexes = new List<Index>();
+
+    public void Refresh()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected override void OnInitialized()
+    {
+        indexes.Add(this);
+
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("m", out var mode))
+        {
+            if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("key", out var key))
+            {
+                if (mode == "w")
+                {
+                    if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("text", out var text))
+                    {
+                        fwLogs.Data.LogsService.AddLog(key, text);
+                    }
+                }
+                else if (mode == "clear")
+                {
+                    fwLogs.Data.LogsService.ClearLog(key);
+                }
+            }
+
+            foreach (Index c in Index.indexes)
+            {
+                c.Refresh();
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        indexes.Remove(this);
+    }
+}
