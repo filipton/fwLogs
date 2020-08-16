@@ -4,16 +4,32 @@
 
 @foreach (string key in fwLogs.Data.LogsService.AllLogs.Keys)
 {
-    <p>@key</p>
-
-    foreach (var val in fwLogs.Data.LogsService.AllLogs[key])
+    string backcol = "#1b6ec2";
+    if (key == SelectedLogs)
     {
-        <a>@val</a>
+        backcol = "#19c23e";
+    }
+
+    <button class="btn btn-primary" style="background-color: @backcol" @onclick="@(() => SelectLog(key))">@key</button>
+}
+@if (SelectedLogs != String.Empty)
+{
+    foreach (var val in fwLogs.Data.LogsService.AllLogs[SelectedLogs])
+    {
+        <p>@val</p>
     }
 }
 
 @code {
     public static List<Index> indexes = new List<Index>();
+
+    public string SelectedLogs = String.Empty;
+
+    public void SelectLog(string log)
+    {
+        SelectedLogs = log;
+        Refresh();
+    }
 
     public void Refresh()
     {
